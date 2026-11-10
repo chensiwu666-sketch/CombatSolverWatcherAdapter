@@ -61,3 +61,21 @@ self-check: 75 Watcher card mirror(s) present in the registry
 ```
 
 换求解器版本时适配层会主动拒绝注册并在日志写明原因（`DISABLED: ...`），这是有意为之。
+
+## 兼容层（CombatSolverCompat）
+
+兼容层只有 Harmony + 游戏程序集两个依赖，不需要公开化的 CombatSolver.dll：
+
+```sh
+cd CombatSolverCompat
+dotnet build -c Release
+```
+
+它通过反射在运行期定位 Combat Solver 的内部方法并打补丁，所以版本不匹配时是"日志里报错 + 不生效"，
+不会把错误的补丁打进去。
+
+## 一次构建两个 mod
+
+```sh
+bash tools/package.sh      # 产物在 dist/WatcherAdapter.zip 与 dist/CombatSolverCompat.zip
+```

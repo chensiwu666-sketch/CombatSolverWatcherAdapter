@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Local paths (game dir) live in ../local.props, which is git-ignored. -->
+  <Import Project="../local.props" Condition="Exists('../local.props')" />
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <AssemblyName>CombatSolverCompat</AssemblyName>
+    <RootNamespace>CombatSolverCompat</RootNamespace>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    <Version>1.4.0</Version>
+    <NoWarn>CS0436</NoWarn>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Sts2Dir Condition="'$(Sts2Dir)' == ''">D:/SteamLibrary/steamapps/common/Slay the Spire 2</Sts2Dir>
+    <Sts2DataDir Condition="'$(Sts2DataDir)' == ''">$(Sts2Dir)/data_sts2_windows_x86_64</Sts2DataDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="0Harmony">
+      <HintPath>$(Sts2DataDir)/0Harmony.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="sts2">
+      <HintPath>$(Sts2DataDir)/sts2.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+</Project>

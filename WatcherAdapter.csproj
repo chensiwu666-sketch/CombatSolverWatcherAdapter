@@ -23,6 +23,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- The compat layer is a sibling project inside this repo; keep it out of this project's glob. -->
+    <Compile Remove="CombatSolverCompat/**/*.cs" />
+    <Compile Remove="dist/**/*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <!-- Compile-time reference against a publicized copy; the real CombatSolver.dll is loaded at runtime. -->
     <Reference Include="CombatSolver">
       <HintPath>$(PublicizedSolverDll)</HintPath>

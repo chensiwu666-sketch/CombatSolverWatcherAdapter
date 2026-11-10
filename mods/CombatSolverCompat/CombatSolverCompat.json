@@ -1,0 +1,11 @@
+{
+  "id": "CombatSolverCompat",
+  "name": "战斗求解器兼容层 / Combat Solver Compat",
+  "author": "chensiwu",
+  "description": "让 Combat Solver 在装有其他改动游戏内容的 mod（如角色 mod）时也能运行：把「检测到第三方 Harmony 补丁 / ModHelper 订阅者就拒绝启动」的硬性检查降级为「尽力预测 + 日志告警」。结果是近似值，不保证与这些 mod 的实际结算完全一致。",
+  "version": "1.4.0",
+  "has_pck": false,
+  "has_dll": true,
+  "affects_gameplay": false,
+  "min_game_version": "0.111.0"
+}
