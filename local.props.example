@@ -1,0 +1,9 @@
+<Project>
+  <!-- Copy to local.props and point these at your machine. local.props is git-ignored. -->
+  <PropertyGroup>
+    <Sts2Dir>D:/SteamLibrary/steamapps/common/Slay the Spire 2</Sts2Dir>
+    <WatcherModDir>D:/SteamLibrary/steamapps/workshop/content/2868840/3747526116</WatcherModDir>
+    <!-- A copy of CombatSolver.dll whose members are publicized; see docs/BUILD.md. -->
+    <PublicizedSolverDll>D:/work/refs/CombatSolver.dll</PublicizedSolverDll>
+  </PropertyGroup>
+</Project>

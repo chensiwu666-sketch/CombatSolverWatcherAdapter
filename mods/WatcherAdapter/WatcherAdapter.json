@@ -1,0 +1,21 @@
+{
+  "id": "WatcherAdapter",
+  "name": "Watcher 适配器（Combat Solver）",
+  "author": "chensiwu",
+  "description": "为 Combat Solver 提供观者角色的战斗推演镜像：卡牌 75/92、架势机、愤怒×2/神性×3、4 个能力持续效果。未覆盖的部分会在路线上打风险标记，不会假装正确。",
+  "version": "0.10.0",
+  "has_pck": false,
+  "has_dll": true,
+  "affects_gameplay": false,
+  "min_game_version": "0.111.0",
+  "dependencies": [
+    {
+      "id": "CombatSolver",
+      "min_version": "0.50.1"
+    },
+    {
+      "id": "Watcher",
+      "min_version": "0.10.8"
+    }
+  ]
+}

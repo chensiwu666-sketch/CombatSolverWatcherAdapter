@@ -1,0 +1,5 @@
+bin/
+obj/
+dist/
+local.props
+*.user

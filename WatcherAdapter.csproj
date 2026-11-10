@@ -1,0 +1,45 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Local paths (game dir, workshop dir, publicized solver) live in local.props, which is git-ignored. -->
+  <Import Project="./local.props" Condition="Exists('./local.props')" />
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <AssemblyName>WatcherAdapter</AssemblyName>
+    <RootNamespace>WatcherAdapter</RootNamespace>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <NoWarn>CS0436;CS0618</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!-- Defaults assume a normal Windows Steam install; override them in local.props. -->
+    <Sts2Dir Condition="'$(Sts2Dir)' == ''">D:/SteamLibrary/steamapps/common/Slay the Spire 2</Sts2Dir>
+    <Sts2DataDir Condition="'$(Sts2DataDir)' == ''">$(Sts2Dir)/data_sts2_windows_x86_64</Sts2DataDir>
+    <WatcherModDir Condition="'$(WatcherModDir)' == ''">D:/SteamLibrary/steamapps/workshop/content/2868840/3747526116</WatcherModDir>
+    <PublicizedSolverDll Condition="'$(PublicizedSolverDll)' == ''">../refs/CombatSolver.dll</PublicizedSolverDll>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Compile-time reference against a publicized copy; the real CombatSolver.dll is loaded at runtime. -->
+    <Reference Include="CombatSolver">
+      <HintPath>$(PublicizedSolverDll)</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="sts2">
+      <HintPath>$(Sts2DataDir)/sts2.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="0Harmony">
+      <HintPath>$(Sts2DataDir)/0Harmony.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Watcher">
+      <HintPath>$(WatcherModDir)/Watcher.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+</Project>
