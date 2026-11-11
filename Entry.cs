@@ -11,7 +11,7 @@ namespace WatcherAdapter;
 [ModInitializer("Initialize")]
 public static class Entry
 {
-    internal const string Version = "0.10.1-batch8";
+    internal const string Version = "0.11.0-batch10";
     // Built and verified against this exact CombatSolver build. A version change means the internal
     // mirror APIs we bind to may have moved, so we fail closed instead of predicting nonsense.
     internal const string ExpectedSolverVersion = "0.50.1.";
@@ -62,6 +62,8 @@ public static class Entry
             CardsBatch6.RegisterAll();
             CardsBatch7.RegisterAll();
             CardsBatch8.RegisterAll();
+            CardsBatch9.RegisterAll();
+            CardsBatch10.RegisterAll();
             DrawMirrors.RegisterAll();
             Playability.RegisterAll();
             PowerMirrors.RegisterAll();

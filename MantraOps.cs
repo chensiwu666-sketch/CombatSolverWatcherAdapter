@@ -20,6 +20,24 @@ internal static class MantraOps
             return;
         }
 
+        // The mod's GainMantra runs inside WatcherStatePower: it ensures the invisible state power
+        // exists and bumps its per-combat / per-turn counters before adding the Mantra power. Those
+        // counters are what 光辉 (Brilliance) and 福音 (Gospel) read, so they have to be maintained
+        // here — third-party field writes never happen inside the search.
+        var state = env.Combat.GetPower<WatcherMod.WatcherStatePower>(player.Creature);
+        if (state == null)
+        {
+            env.Sink.ApplyPowerFromSource(
+                typeof(WatcherMod.WatcherStatePower), player.Creature, 1, player.Creature, source);
+            state = env.Combat.GetPower<WatcherMod.WatcherStatePower>(player.Creature);
+        }
+
+        if (state != null)
+        {
+            state.TotalMantraGainedThisCombat += amount;
+            state.MantraGainedThisTurn += amount;
+        }
+
         env.Sink.ApplyPowerFromSource(typeof(Mantra), player.Creature, amount, player.Creature, source);
 
         int mantra = env.Combat.GetAmount<Mantra>(player.Creature);

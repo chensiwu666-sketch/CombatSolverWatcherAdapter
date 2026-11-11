@@ -27,16 +27,20 @@
 3. 把 `CombatSolverCompat.dll` 与 `CombatSolverCompat.json` 放进 `<游戏目录>/mods/CombatSolverCompat/`
 4. 启动游戏，确认 mod 列表里两个都在
 
-启动后 `%APPDATA%/SlayTheSpire2/logs/WatcherAdapter.log` 会写出登记结果，包括 `self-check: 75 Watcher card mirror(s) present`。
+启动后 `%APPDATA%/SlayTheSpire2/logs/WatcherAdapter.log` 会写出登记结果，包括 `self-check: 86 Watcher card mirror(s) present`。
 
 ## 当前状态
 
-- 卡牌镜像 75 / 92（有 OnPlay 的卡），逐条对照 mod 反编译源码写成
+- 卡牌镜像 79 / 83（观者牌池：玩家在奖励和商店里能看到的全部卡），逐条对照 mod 反编译源码写成
+- 未镜像 4 张：嘲讽、规劝（多人专属，单人局不会出现）、他山之石（选项由游戏 RNG 现场抽取，无法对齐实机页面）、画符（效果是给牌附魔，求解器没有附魔概念）
 - 架势机：平静 / 愤怒 / 神性 / 预见，含移除平静返能量、进神性返 3 能量、紫莲花回能
 - 伤害倍率：愤怒 ×2（含受伤）、神性 ×3（仅出伤）
 - Power 持续效果：静水、沸腾之怒、神性形态、虔诚（含真言满 10 转神性）
+- 隐藏状态进指纹：本场累计真言 / 本回合真言（光辉、福音的数值来源）
 - 抽牌时点：无明（抽到即消耗并生成奇迹）
-- 明确未镜像的 17 张卡与原因：见 [COVERAGE.md](COVERAGE.md)
+- 选牌三选一：冥想、通晓万物、许愿
+- 额外回合：腾跃
+- 卡名对照表见 [COVERAGE.md](COVERAGE.md)（中文名与游戏内一致，自动生成）
 
 ## 已知限制（请先读）
 

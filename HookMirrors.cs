@@ -3,6 +3,7 @@ using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.ValueProps;
 using CombatSolver.Engine.InCombat.Mirrors.Hooks.Damage;
+using CombatSolver.Engine.InCombat.Mirrors.Hooks.TurnEnd;
 
 namespace WatcherAdapter;
 
@@ -23,6 +24,37 @@ internal static class HookMirrors
     {
         RegisterStance<WatcherMod.Wrath>(2m, doublesIncoming: true);
         RegisterStance<WatcherMod.Divinity>(3m, doublesIncoming: false);
+        RegisterExtraTurn();
+    }
+
+    /// <summary>
+    /// 腾跃's extra turn. The mod grants it by applying WatcherExtraTurnPower and ending the turn; the
+    /// power's ShouldTakeExtraTurn answers true for its owner, and AfterTakingExtraTurn removes it.
+    /// Both hooks are third-party code the search never runs, so without this registration the card
+    /// would look like a plain "discard your turn" and the search would refuse to play it.
+    /// </summary>
+    private static void RegisterExtraTurn()
+    {
+        try
+        {
+            ExtraTurnMirrors.RegisterShouldTakeExtraTurn<WatcherMod.WatcherExtraTurnPower>(
+                (power, context) => context.Player == power.Owner.Player);
+            ExtraTurnMirrors.RegisterAfterTakingExtraTurn<WatcherMod.WatcherExtraTurnPower>(
+                (power, context) =>
+                {
+                    if (context.Player != power.Owner.Player)
+                    {
+                        return;
+                    }
+
+                    context.Combat.SetPowerAmount(power, 0);
+                });
+            Entry.Log("hook mirror registered: WatcherExtraTurnPower extra turn");
+        }
+        catch (Exception ex)
+        {
+            Entry.Log($"FAILED to register WatcherExtraTurnPower extra turn: {ex.GetType().Name}: {ex.Message}");
+        }
     }
 
     private static void RegisterStance<T>(decimal multiplier, bool doublesIncoming) where T : PowerModel

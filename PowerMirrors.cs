@@ -1,4 +1,5 @@
 using System;
+using CombatSolver;
 using MegaCrit.Sts2.Core.ValueProps;
 using CombatSolver.Engine.InCombat.Mirrors.Hooks.TurnEnd;
 using CombatSolver.Engine.InCombat.Mirrors.Hooks.TurnStart;
@@ -23,8 +24,26 @@ internal static class PowerMirrors
         RegisterSimmeringFury();
         RegisterDevaForm();
         RegisterDevotion();
+        RegisterHiddenStates();
         LogUnavailableSideTurnEndEffects();
     }
+
+    /// <summary>
+    /// 光辉 (Brilliance) adds every Mantra gained this combat to its damage; the counter lives in a plain
+    /// field on WatcherStatePower, alongside 福音 (Gospel)'s per-turn one. The state fingerprint only
+    /// collects a power's DynamicVars, so without these registrations two branches that differ only in
+    /// the counter look identical — the search would keep one and drop the other, and the number would
+    /// be right while the route was still lost.
+    /// </summary>
+    private static void RegisterHiddenStates() => Guard("hidden state: WatcherStatePower mantra counters", () =>
+    {
+        PowerHiddenStateMirrors.Register<WatcherStatePower>(
+            "TotalMantraGained",
+            (simulator, power) => power.TotalMantraGainedThisCombat);
+        PowerHiddenStateMirrors.Register<WatcherStatePower>(
+            "MantraGainedThisTurn",
+            (simulator, power) => power.MantraGainedThisTurn);
+    });
 
     /// <summary>Like Water: at the end of its owner's side turn, gain Amount block while in Calm.</summary>
     private static void RegisterLikeWater() => Guard("LikeWaterPower (block at side turn end while in Calm)", () =>

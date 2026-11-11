@@ -17,7 +17,25 @@ import sys
 
 ADAPTER = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 WATCHER_SRC = os.environ.get("WATCHER_SRC", r"D:/work/watcher_src/src/WatcherMod")
+WATCHER_LOC = os.environ.get("WATCHER_LOC", r"D:/work/watcher_loc_zh.json")
 OUT = os.path.join(ADAPTER, "COVERAGE.md")
+
+# Card display names: the mod ships its own Chinese localisation, and the user reads card names in
+# Chinese. Screenshots of the in-game UI must match this table, so it is read from the extracted
+# localisation rather than translated here.
+ZH = {}
+if os.path.exists(WATCHER_LOC):
+    import json
+    ZH = json.load(open(WATCHER_LOC, encoding="utf-8"))
+
+
+def card_label(type_name):
+    """WatcherFearNoEvil -> WATCHER_FEAR_NO_EVIL -> 不惧妖邪 (falls back to the short English name)."""
+    short = type_name.replace("Watcher", "")
+    key = re.sub(r"(?<!^)(?=(?<=_)[A-Z])", "_", re.sub(r"(?<!^)(?=[A-Z])", "_", short)).upper()
+    key = key.replace("__", "_")
+    value = ZH.get("WATCHER_" + key) or ZH.get(key)
+    return f"{value}（{short}）" if value else short
 
 if not os.path.isdir(WATCHER_SRC):
     sys.exit(f"Watcher 反编译源码目录不存在：{WATCHER_SRC}\n用 WATCHER_SRC=... 指向正确位置。")
@@ -82,7 +100,8 @@ GAP = {
     "WatcherConjureBlade": ("可做", "X 费生成 Expunger 进抽牌堆并把 Repeat 设为 X（升级 +1）；"
                                     "生成结果 SimCardPileAddResult 带 PredictedCard，可写 DynamicVars"),
     "WatcherFearNoEvil": ("可做", "伤害 + 目标在攻击则进平静；SimulatedCombatState.IsEnemyIntendingToAttack() 是 public"),
-    "WatcherForeignInfluence": ("可做", "三选一攻击牌入手；CardChoiceMirrors + PlanChoiceEffect.GenerateToHand"),
+    "WatcherForeignInfluence": ("做不了", "三张选项由 mod 用游戏 RNG 现场抽取，预测侧无法得知实机页面上是哪三张，"
+                                            "部署时按 CardId 定位必然错位；选项固定的许愿则可以精确登记"),
     "WatcherLessonLearned": ("可做（部分）", "伤害部分可精确镜像；斩杀后升级牌库属局外状态，战斗内无数值影响，需打风险标记"),
     "WatcherMeditate": ("可做", "弃牌堆选 1 张回手 + 进平静 + 若为本张系列最后一张则结束回合；"
                                 "CardChoiceMirrors + RequestPlayerTurnEnd"),
@@ -118,27 +137,28 @@ lines = ["# 覆盖报告（自动生成）\n",
          f"- 牌池（玩家在奖励/商店能看到）：**{len(pool)} 张**（mod 声明 `CardModel[{declared_count}]`）",
          f"- 牌池已镜像：**{len(pool) - len(missing_pool)} / {len(pool)}**",
          f"- 已注册卡牌类型合计：{len(registered)}",
-         f"- 抽牌时点镜像：{len(draw_mirrors)}（{', '.join(n.replace('Watcher', '') for n in draw_mirrors) or '—'}）",
-         f"- Power 持续效果镜像：{len([p for p in power_mirrors if not p.startswith('不可用')])}",
-         f"- 姿态伤害倍率：{', '.join('%s ×%s' % (n.replace('Watcher', ''), v) for n, v in hook_mirrors)}",
+         f"- 抽牌时点镜像：{len(draw_mirrors)}（{', '.join(card_label(n) for n in draw_mirrors) or '—'}）",
+         f"- Power 持续效果镜像：{len([p for p in power_mirrors if not p.startswith('不可用') and not p.startswith('hidden state')])}",
+         f"- Power 隐藏状态进指纹：{len([p for p in power_mirrors if p.startswith('hidden state')])} 项",
+         f"- 姿态伤害倍率：{', '.join('%s ×%s' % (card_label(n), v) for n, v in hook_mirrors)}",
          f"- Power 预热：{len(prewarmed)} 个\n"]
 
 lines.append("## 牌池里还未镜像的卡\n")
 lines.append("| 卡牌 | 判定 | 实测原因 / 缺什么 |\n|---|---|---|")
 for name in missing_pool:
     verdict, why = GAP.get(name, ("未分类", "⚠ 原因表缺这一项，请补"))
-    lines.append(f"| {name.replace('Watcher', '')} | {verdict} | {why} |")
+    lines.append(f"| {card_label(name)} | {verdict} | {why} |")
 
 lines.append("\n## 牌池之外的未镜像类型（生成牌 / 令牌 / 基类）\n")
 lines.append("| 类型 | 判定 | 说明 |\n|---|---|---|")
 for name in outside:
     verdict, why = GAP.get(name, ("未分类", "⚠ 原因表缺这一项，请补"))
-    lines.append(f"| {name.replace('Watcher', '')} | {verdict} | {why} |")
+    lines.append(f"| {card_label(name)} | {verdict} | {why} |")
 
 lines.append("\n## 已镜像的牌池卡\n")
 lines.append("| 卡牌 |\n|---|")
 for name in sorted(c for c in pool if c in registered):
-    lines.append(f"| {name.replace('Watcher', '')} |")
+    lines.append(f"| {card_label(name)} |")
 
 lines.append("\n## 带风险标记的近似（面板会显示提示）\n")
 lines.append("- Scry 的弃牌选择由适配器按固定规则决定，不进入搜索分支")
