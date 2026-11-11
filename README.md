@@ -29,6 +29,11 @@
 
 启动后 `%APPDATA%/SlayTheSpire2/logs/WatcherAdapter.log` 会写出登记结果，包括 `self-check: 86 Watcher card mirror(s) present`。
 
+## 发布
+
+Steam 创意工坊：**战斗求解器：观者兼容** —— https://steamcommunity.com/sharedfiles/filedetails/?id=3837745863
+（物品 ID `3837745863`，上传工作区 `D:\work\workshop\watcher-adapter`，带 `mod_id.txt` 后再次 upload 即更新同一条目）
+
 ## 当前状态
 
 - 卡牌镜像 79 / 83（观者牌池：玩家在奖励和商店里能看到的全部卡），逐条对照 mod 反编译源码写成
