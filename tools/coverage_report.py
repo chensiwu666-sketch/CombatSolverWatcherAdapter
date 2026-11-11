@@ -37,6 +37,7 @@ for m in re.finditer(r"ModelDb\.Card<(Watcher\w+)>\(\)", pool_text):
     if m.group(1) not in pool:
         pool.append(m.group(1))
 declared = re.search(r"CardModel\[(\d+)\]", pool_text)
+declared_count = declared.group(1) if declared else str(len(pool))
 
 # ---------------------------------------------------------------- adapter side
 registered = set()
@@ -114,7 +115,7 @@ outside = sorted(card_types - set(pool) - registered)
 lines = ["# 覆盖报告（自动生成）\n",
          "本文件由 `tools/coverage_report.py` 从**两棵源码树**生成，请勿手改。\n",
          f"- 观者 mod 的卡牌类：{len(card_types)} 个",
-         f"- 牌池（玩家在奖励/商店能看到）：**{len(pool)} 张**（mod 声明 `CardModel[{declared.group(1)}]`）",
+         f"- 牌池（玩家在奖励/商店能看到）：**{len(pool)} 张**（mod 声明 `CardModel[{declared_count}]`）",
          f"- 牌池已镜像：**{len(pool) - len(missing_pool)} / {len(pool)}**",
          f"- 已注册卡牌类型合计：{len(registered)}",
          f"- 抽牌时点镜像：{len(draw_mirrors)}（{', '.join(n.replace('Watcher', '') for n in draw_mirrors) or '—'}）",
