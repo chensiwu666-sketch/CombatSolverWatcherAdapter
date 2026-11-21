@@ -37,7 +37,56 @@ internal static class PowerMirrorsBatch11
         RegisterCloakClasp();
         RegisterBlockReturn();
         RegisterGospel();
+        RegisterColdObservation();
     }
+
+    /// <summary>
+    /// 冷眼旁观 (ColdObservationPower): every powered move hit the owner deals turns into block equal to the
+    /// total damage, and the power only counts down once per card — four hits from one attack are one stack.
+    ///
+    /// The mod keeps "which card did I already count" in a private field. The search can't read or write that
+    /// field, so the same fact lives in a branch state object: it forks with the branch, and the stored card is
+    /// remapped so a fork never compares itself against the parent's copy.
+    /// </summary>
+    private static void RegisterColdObservation() => Guard("ColdObservationPower (damage to block, one stack per card)", () =>
+    {
+        if (!MirrorBridge.TryRegister<ColdObservationPower, AfterDamageGivenMirrorContext>(
+                typeof(AfterDamageGivenMirrors),
+                "Registry",
+                (power, context) =>
+                {
+                    if (power.Owner == null || power.Amount <= 0 || context.Dealer != power.Owner)
+                    {
+                        return;
+                    }
+
+                    if (!context.Props.HasFlag(ValueProp.Move) || context.Props.HasFlag(ValueProp.Unpowered))
+                    {
+                        return;
+                    }
+
+                    if (context.Result.TotalDamage <= 0)
+                    {
+                        return;
+                    }
+
+                    var env = StanceEnv.FromParts(context.CombatState, context.Simulator, context.History);
+                    env.Simulator.GainBlock(power.Owner, context.Result.TotalDamage, ValueProp.Unpowered);
+
+                    var state = context.StateStore.Get(power, static () => new ColdObservationState());
+                    if (ReferenceEquals(state.LastCard, context.Source))
+                    {
+                        return;
+                    }
+
+                    state.LastCard = context.Source;
+                    env.Sink.SetPowerAmount(power, Math.Max(0, power.Amount - 1));
+                },
+                out string error))
+        {
+            throw new InvalidOperationException("AfterDamageGiven bridge failed: " + error);
+        }
+    });
 
     /// <summary>
     /// 格挡回击型的 BlockReturnPower: when its owner takes powered attack damage from someone else, that
@@ -326,4 +375,19 @@ internal static class PowerMirrorsBatch11
             Entry.Log($"FAILED to register {name}: {ex.GetType().Name}: {ex.Message}");
         }
     }
+}
+
+/// <summary>
+/// Branch-local replacement for ColdObservationPower's private "card already counted" field.
+/// </summary>
+/// <remarks>
+/// The stored card is a branch object, so <see cref="Fork"/> has to remap it; a MemberwiseClone would leave the
+/// fork pointing at the parent's PredictedCard and every fork would count the same card a second time.
+/// </remarks>
+internal sealed class ColdObservationState : IPredictionStateForkable
+{
+    internal PredictedCard? LastCard;
+
+    public object Fork(PredictionForkContext context) =>
+        new ColdObservationState { LastCard = LastCard is null ? null : context.RemapOrSelf(LastCard) };
 }

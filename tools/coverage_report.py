@@ -178,8 +178,7 @@ POWER_GAP = {
                                     "只做前半段会让这个能力整局不消失、把后续每回合都算强，等 PR #245 一起接"),
     "BlessProphecyDamagePower": ("未建模", "伤害加成在 ModifyDamageAdditive，且要靠 AfterCardPlayed 和常规回合末移除；两处都没有开放或未桥接"),
     "ConfusionPower": ("未建模", "受到的预言牌伤害倍率 + 敌方回合末递减；只做倍率不减时间会永久生效，等回合末入口"),
-    "ColdObservationPower": ("未建模", "伤害转格挡本身可做，但它按「每张牌只递减一次」记私有字段，多段攻击在分支里没有等价状态，"
-                                      "硬做会少算层数"),
+
     "DeepThoughtSleepPower": ("未建模", "触发点是自己写的 AfterSideTurnStartCompat，不是可登记的原生虚方法"),
     "Divinity": ("部分", "伤害倍率已镜像；自动退出写在同一 Power 的常规 AfterSideTurnEnd，未建模（PR #245）"),
 }

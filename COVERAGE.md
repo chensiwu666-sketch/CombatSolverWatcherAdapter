@@ -7,7 +7,7 @@
 - 牌池已镜像：**79 / 83**
 - 已注册卡牌类型合计：87
 - 抽牌时点镜像：1（机械降神（DeusExMachina））
-- Power 持续效果镜像：14
+- Power 持续效果镜像：15
 - Power 隐藏状态进指纹：1 项
 - 姿态伤害倍率：愤怒（Wrath） ×2, 神格（Divinity） ×3
 - Power 预热：29 个
@@ -46,7 +46,7 @@
 | BlessProphecyDamagePower | AfterSideTurnEnd | 未建模 | 伤害加成在 ModifyDamageAdditive，且要靠 AfterCardPlayed 和常规回合末移除；两处都没有开放或未桥接 |
 | BlockReturnPower | AfterDamageGiven | 已镜像 | |
 | CloakClasp_P | BeforeSideTurnEnd | 已镜像 | |
-| ColdObservationPower | AfterDamageGiven | 未建模 | 伤害转格挡本身可做，但它按「每张牌只递减一次」记私有字段，多段攻击在分支里没有等价状态，硬做会少算层数 |
+| ColdObservationPower | AfterDamageGiven | 已镜像 | |
 | CollectPower | AfterPlayerTurnStart | 已镜像 | |
 | ConfusionPower | AfterSideTurnEnd、ModifyDamageMultiplicative | 未建模 | 受到的预言牌伤害倍率 + 敌方回合末递减；只做倍率不减时间会永久生效，等回合末入口 |
 | Damaru | AfterPlayerTurnStart | 已镜像 | |
