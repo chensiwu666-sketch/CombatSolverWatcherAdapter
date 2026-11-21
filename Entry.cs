@@ -11,10 +11,10 @@ namespace WatcherAdapter;
 [ModInitializer("Initialize")]
 public static class Entry
 {
-    internal const string Version = "0.11.0-batch10";
+    internal const string Version = "0.13.0-powerturns";
     // Built and verified against this exact CombatSolver build. A version change means the internal
     // mirror APIs we bind to may have moved, so we fail closed instead of predicting nonsense.
-    internal const string ExpectedSolverVersion = "0.50.1.";
+    internal const string ExpectedSolverVersion = "0.51.9.";
     private static readonly object LogLock = new object();
     internal static string LogPath;
 
@@ -67,6 +67,7 @@ public static class Entry
             DrawMirrors.RegisterAll();
             Playability.RegisterAll();
             PowerMirrors.RegisterAll();
+            PowerMirrorsBatch11.RegisterAll();
             Prewarm.RegisterAll();
 
             VerifyRegistrations();

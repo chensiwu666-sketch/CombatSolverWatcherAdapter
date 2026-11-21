@@ -7,10 +7,10 @@
 - 牌池已镜像：**79 / 83**
 - 已注册卡牌类型合计：87
 - 抽牌时点镜像：1（机械降神（DeusExMachina））
-- Power 持续效果镜像：4
+- Power 持续效果镜像：14
 - Power 隐藏状态进指纹：1 项
 - 姿态伤害倍率：愤怒（Wrath） ×2, 神格（Divinity） ×3
-- Power 预热：27 个
+- Power 预热：29 个
 
 ## 牌池里还未镜像的卡
 
@@ -35,6 +35,42 @@
 | 全能全知（WishAlmighty） | 不适用 | 许愿的选项令牌，随 Wish_P 一起完成 |
 | 名利双收（WishFameAndFortune） | 不适用 | 许愿的选项令牌，随 Wish_P 一起完成 |
 | 长生不老（WishLiveForever） | 不适用 | 许愿的选项令牌，随 Wish_P 一起完成 |
+
+## 能力牌 / 遗物的回合钩子
+
+卡面镜像不等于数值正确：能力牌自己的钩子不登记，那张牌在搜索里就等于白打。本表按 mod 的覆写逐个核对。
+
+| 类型 | 覆写的阶段 | 状态 | 说明 |
+|---|---|---|---|
+| BattleHymnPower | AfterPlayerTurnStart | 已镜像 | |
+| BlessProphecyDamagePower | AfterSideTurnEnd | 未建模 | 伤害加成在 ModifyDamageAdditive，且要靠 AfterCardPlayed 和常规回合末移除；两处都没有开放或未桥接 |
+| BlockReturnPower | AfterDamageGiven | 已镜像 | |
+| CloakClasp_P | BeforeSideTurnEnd | 已镜像 | |
+| ColdObservationPower | AfterDamageGiven | 未建模 | 伤害转格挡本身可做，但它按「每张牌只递减一次」记私有字段，多段攻击在分支里没有等价状态，硬做会少算层数 |
+| CollectPower | AfterPlayerTurnStart | 已镜像 | |
+| ConfusionPower | AfterSideTurnEnd、ModifyDamageMultiplicative | 未建模 | 受到的预言牌伤害倍率 + 敌方回合末递减；只做倍率不减时间会永久生效，等回合末入口 |
+| Damaru | AfterPlayerTurnStart | 已镜像 | |
+| DeepThoughtSleepPower | AfterDamageReceived | 未建模 | 触发点是自己写的 AfterSideTurnStartCompat，不是可登记的原生虚方法 |
+| DevaPower | AfterEnergyReset | 已镜像 | |
+| DevotionPower | AfterPlayerTurnStart | 已镜像 | |
+| DivineDoomPower | AfterDamageGiven、AfterPlayerTurnStartEarly | 不需要 | 布道只在多人局施加，单人局不会出现 |
+| Divinity | AfterSideTurnEnd、ModifyDamageMultiplicative | 部分 | 伤害倍率已镜像；自动退出写在同一 Power 的常规 AfterSideTurnEnd，未建模（PR #245） |
+| EndTurnDeathPower | AfterPlayerTurnStart | 已镜像 | |
+| EnergyDownPower | AfterEnergyReset | 已镜像 | |
+| EnlightenFatePower | AfterPlayerTurnStartEarly、AfterSideTurnEnd | 未建模 | 常规 AfterSideTurnEnd 决定挂起真言，且依赖「知命」消费方，暂不做 |
+| Foreseen | AfterPlayerTurnStart | 未建模 | 自身只施加知命；知命由梵音等卡消费，消费方未建模前单独做它没有意义 |
+| GospelPower | AfterDamageGiven | 已镜像 | |
+| LikeWaterPower | BeforeSideTurnEnd | 已镜像 | |
+| OmegaPower | AfterSideTurnEnd | 未建模 | 同上：常规 AfterSideTurnEnd 无第三方入口 |
+| RestfulPower | AfterPlayerTurnStartEarly、ModifyDamageMultiplicative | 已镜像 | |
+| SimmeringFuryPower | AfterPlayerTurnStart | 已镜像 | |
+| StudyPower | AfterSideTurnEnd | 未建模 | 效果写在常规 AfterSideTurnEnd；求解器只有 Late 入口，PR #245 合并后即可接 |
+| WatcherDeusExMachina | AfterCardDrawn | 已镜像 | |
+| WatcherExtraTurnPower | AfterTakingExtraTurn、ShouldTakeExtraTurn | 已镜像 | |
+| WatcherStatePower | AfterPlayerTurnStartEarly | 已镜像 | |
+| WaveOfTheHandPower | AfterSideTurnEnd | 未建模 | 主效果在 AfterBlockGained（每次获得格挡给全体上虚弱），而移除它的回合末入口还没开放；只做前半段会让这个能力整局不消失、把后续每回合都算强，等 PR #245 一起接 |
+| WishPlatedArmorPower | AfterDamageReceived、BeforeSideTurnEnd | 已镜像 | |
+| Wrath | ModifyDamageMultiplicative | 已镜像 | |
 
 ## 已镜像的牌池卡
 

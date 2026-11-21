@@ -134,9 +134,9 @@ internal static class PowerMirrors
     /// </summary>
     private static void LogUnavailableSideTurnEndEffects()
     {
-        Entry.Log("power mirror unavailable: StudyPower / OmegaPower hook the regular AfterSideTurnEnd pass, "
-                  + "which CombatSolver 0.50.1 does not expose for third-party registration (late pass only). "
-                  + "Their end-of-turn effect is NOT modelled.");
+        Entry.Log("power mirror unavailable: StudyPower / OmegaPower / EnlightenFatePower / WaveOfTheHandPower "
+                  + "act in the regular AfterSideTurnEnd pass, which this CombatSolver build does not expose for "
+                  + "third-party registration (late pass only). Their end-of-turn effect is NOT modelled.");
     }
 
     private static void Guard(string name, Action register)

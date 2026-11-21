@@ -16,7 +16,7 @@ import re
 import sys
 
 ADAPTER = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-WATCHER_SRC = os.environ.get("WATCHER_SRC", r"D:/work/watcher_src/src/WatcherMod")
+WATCHER_SRC = os.environ.get("WATCHER_SRC", r"D:/work/watcher_src_0519/WatcherMod")
 WATCHER_LOC = os.environ.get("WATCHER_LOC", r"D:/work/watcher_loc_zh.json")
 OUT = os.path.join(ADAPTER, "COVERAGE.md")
 
@@ -76,11 +76,12 @@ hook_mirrors, power_mirrors, draw_mirrors = [], [], []
 hm = os.path.join(ADAPTER, "HookMirrors.cs")
 if os.path.exists(hm):
     hook_mirrors = re.findall(r"RegisterStance<WatcherMod\.(\w+)>\((\d+)m", open(hm, encoding="utf-8").read())
-pm = os.path.join(ADAPTER, "PowerMirrors.cs")
-if os.path.exists(pm):
-    t = open(pm, encoding="utf-8").read()
-    power_mirrors = re.findall(r'Guard\("([^"]+)"', t)
-    power_mirrors += ["不可用：" + n for n in re.findall(r'Entry\.Log\("power mirror unavailable: ([^"]+)"', t)]
+for pm_name in ("PowerMirrors.cs", "PowerMirrorsBatch11.cs"):
+    pm = os.path.join(ADAPTER, pm_name)
+    if os.path.exists(pm):
+        t = open(pm, encoding="utf-8").read()
+        power_mirrors += re.findall(r'Guard\("([^"]+)"', t)
+        power_mirrors += ["不可用：" + n for n in re.findall(r'Entry\.Log\("power mirror unavailable: ([^"]+)"', t)]
 dm = os.path.join(ADAPTER, "DrawMirrors.cs")
 if os.path.exists(dm):
     draw_mirrors = re.findall(r"Registry\.Register<WatcherMod\.(\w+)>", open(dm, encoding="utf-8").read())
@@ -154,6 +155,72 @@ lines.append("| 类型 | 判定 | 说明 |\n|---|---|---|")
 for name in outside:
     verdict, why = GAP.get(name, ("未分类", "⚠ 原因表缺这一项，请补"))
     lines.append(f"| {card_label(name)} | {verdict} | {why} |")
+
+# ---------------------------------------------------------------- power / relic hook coverage
+# The card table above says nothing about whether a power's own hook runs inside the search: a card
+# that applies an unmirrored power still looks mirrored and under-predicts. This section reads the
+# mod's hook overrides and asks the adapter source whether that exact type is registered.
+HOOKS = [
+    "AfterPlayerTurnStartEarly", "AfterPlayerTurnStartLate", "AfterPlayerTurnStart",
+    "BeforeSideTurnEnd", "AfterSideTurnEndLate", "AfterSideTurnEnd",
+    "BeforeSideTurnStart", "AfterEnergyReset", "AfterCardDrawn",
+    "ModifyDamageMultiplicative", "AfterDamageReceived", "AfterDamageGiven",
+    "ShouldTakeExtraTurn", "AfterTakingExtraTurn",
+]
+
+POWER_GAP = {
+    "StudyPower": ("未建模", "效果写在常规 AfterSideTurnEnd；求解器只有 Late 入口，PR #245 合并后即可接"),
+    "OmegaPower": ("未建模", "同上：常规 AfterSideTurnEnd 无第三方入口"),
+    "EnlightenFatePower": ("未建模", "常规 AfterSideTurnEnd 决定挂起真言，且依赖「知命」消费方，暂不做"),
+    "Foreseen": ("未建模", "自身只施加知命；知命由梵音等卡消费，消费方未建模前单独做它没有意义"),
+    "DivineDoomPower": ("不需要", "布道只在多人局施加，单人局不会出现"),
+    "WaveOfTheHandPower": ("未建模", "主效果在 AfterBlockGained（每次获得格挡给全体上虚弱），而移除它的回合末入口还没开放；"
+                                    "只做前半段会让这个能力整局不消失、把后续每回合都算强，等 PR #245 一起接"),
+    "BlessProphecyDamagePower": ("未建模", "伤害加成在 ModifyDamageAdditive，且要靠 AfterCardPlayed 和常规回合末移除；两处都没有开放或未桥接"),
+    "ConfusionPower": ("未建模", "受到的预言牌伤害倍率 + 敌方回合末递减；只做倍率不减时间会永久生效，等回合末入口"),
+    "ColdObservationPower": ("未建模", "伤害转格挡本身可做，但它按「每张牌只递减一次」记私有字段，多段攻击在分支里没有等价状态，"
+                                      "硬做会少算层数"),
+    "DeepThoughtSleepPower": ("未建模", "触发点是自己写的 AfterSideTurnStartCompat，不是可登记的原生虚方法"),
+    "Divinity": ("部分", "伤害倍率已镜像；自动退出写在同一 Power 的常规 AfterSideTurnEnd，未建模（PR #245）"),
+}
+
+hook_overrides = {}
+for name in os.listdir(WATCHER_SRC):
+    if not name.endswith(".cs"):
+        continue
+    text = open(os.path.join(WATCHER_SRC, name), encoding="utf-8", errors="replace").read()
+    cls = re.search(r"class\s+(\w+)\s*:\s*(\w+)", text)
+    if not cls:
+        continue
+    hooks = sorted({h for h in HOOKS if re.search(rf"override\s+[\w\s<>,\[\]?]+\s+{h}\s*\(", text)})
+    if hooks:
+        hook_overrides[cls.group(1)] = hooks
+
+adapter_text = ""
+for name in os.listdir(ADAPTER):
+    if name.endswith(".cs"):
+        adapter_text += open(os.path.join(ADAPTER, name), encoding="utf-8", errors="replace").read()
+
+def mirrored(t):
+    # Any registration entry counts: Register / RegisterEarly / RegisterStance / RegisterShouldTakeExtraTurn /
+    # RegisterAfterTakingExtraTurn / the reflection bridge. Matching only "Register<" reported mirrored stances
+    # and the extra-turn power as gaps.
+    return (re.search(rf"Register\w*<(?:\w+\.)?{t}>", adapter_text) is not None
+            or re.search(rf"TryRegister<{t},", adapter_text) is not None)
+
+lines.append("\n## 能力牌 / 遗物的回合钩子\n")
+lines.append("卡面镜像不等于数值正确：能力牌自己的钩子不登记，那张牌在搜索里就等于白打。本表按 mod 的覆写逐个核对。\n")
+lines.append("| 类型 | 覆写的阶段 | 状态 | 说明 |\n|---|---|---|---|")
+for t in sorted(hook_overrides):
+    hooks = "、".join(hook_overrides[t])
+    if t in POWER_GAP:
+        verdict, why = POWER_GAP[t]
+        lines.append(f"| {t} | {hooks} | {verdict} | {why} |")
+        continue
+    if mirrored(t):
+        lines.append(f"| {t} | {hooks} | 已镜像 | |")
+        continue
+    lines.append(f"| {t} | {hooks} | 未建模 | ⚠ 未登记也没有理由，请补 |")
 
 lines.append("\n## 已镜像的牌池卡\n")
 lines.append("| 卡牌 |\n|---|")

@@ -49,6 +49,8 @@ internal static class Prewarm
         typeof(WatcherMod.BattleHymnPower),
         typeof(WatcherMod.WatcherExtraTurnPower),
         typeof(WatcherMod.WatcherStatePower),
+        typeof(WatcherMod.RestfulPower),
+        typeof(WatcherMod.WishPlatedArmorPower),
     ];
 
     internal static void RegisterAll()
