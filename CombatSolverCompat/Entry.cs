@@ -21,7 +21,7 @@ namespace CombatSolverCompat;
 [ModInitializer("Initialize")]
 public static class Entry
 {
-    internal const string Version = "1.4.0";
+    internal const string Version = "1.5.0";
     internal const string HarmonyId = "chensiwu.combatsolvercompat";
 
     internal static readonly Harmony Harmony = new Harmony(HarmonyId);

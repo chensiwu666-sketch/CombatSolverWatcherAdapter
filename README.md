@@ -1,11 +1,11 @@
 # Watcher 适配器（Combat Solver）
 
-让《战斗路线求解器 / Combat Solver》看懂 [观者（Watcher）](https://steamcommunity.com/sharedfiles/filedetails/?id=3747526116) 这个角色 mod 的卡牌与架势。
+让《战斗路线求解器 / Combat Solver》看懂 [观者（Watcher）](https://steamcommunity.com/sharedfiles/filedetails/?id=3747526116) 这个角色 mod 的卡牌、架势，以及能力牌和遗物的每回合效果。
 
 观者不是原版角色，求解器默认无法推演她的卡，遇到会直接停摆。完整方案由两部分组成：
 
 1. **兼容层**（`CombatSolverCompat`，本仓库 `CombatSolverCompat/`）：把"检测到未适配内容就拒绝启动"降级为"尽力推演 + 明确标风险"，让求解器在装了角色 mod 的情况下也能跑。
-2. **适配层**（本仓库）：把观者的卡牌出牌效果、架势机制、部分能力的持续效果，按 mod 源码逐个镜像给求解器。
+2. **适配层**（本仓库）：把观者的卡牌出牌效果、架势机制、能力牌与遗物的每回合效果，按 mod 源码逐个镜像给求解器。
 
 > 两个 mod 必须同时安装：只装适配层时，求解器仍会因"未适配内容"拒绝启动。
 
@@ -15,10 +15,10 @@
 
 | 项目 | 版本 |
 |---|---|
-| 游戏 | 0.111.0 |
-| [Combat Solver](https://steamcommunity.com/sharedfiles/filedetails/?id=3790899961) | ≥ 0.50.1（当前按 0.50.1 构建与验证） |
-| [Watcher](https://steamcommunity.com/sharedfiles/filedetails/?id=3747526116) | ≥ 0.10.8 |
-| RitsuLib | ≥ 0.6.0（Combat Solver 自己的要求） |
+| 游戏 | 0.113.0 |
+| [Combat Solver](https://steamcommunity.com/sharedfiles/filedetails/?id=3790899961) | ≥ 0.51.9（当前按 0.51.9 构建与验证） |
+| [Watcher](https://steamcommunity.com/sharedfiles/filedetails/?id=3747526116) | ≥ 0.10.20 |
+| RitsuLib | ≥ 0.6.11（Combat Solver 自己的要求） |
 
 ## 安装
 
